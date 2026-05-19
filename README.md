@@ -15,7 +15,7 @@ Use Render from Claude Code to deploy apps, validate `render.yaml`, debug failed
 Add this repo as a Claude Code marketplace, then install the `render` plugin from it:
 
 ```
-/plugin marketplace add renderinc/render-claude-plugin
+/plugin marketplace add render-oss/render-claude-plugin
 /plugin install render
 ```
 
@@ -24,7 +24,7 @@ Add this repo as a Claude Code marketplace, then install the `render` plugin fro
 1. Clone this repo, then add it as a local marketplace:
 
 ```bash
-git clone https://github.com/renderinc/render-claude-plugin.git
+git clone https://github.com/render-oss/render-claude-plugin.git
 ```
 
 2. In Claude Code, point at the local checkout:
