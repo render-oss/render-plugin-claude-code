@@ -1,10 +1,9 @@
 {
-  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "render-claude-plugin",
-  "description": "Render plugins for Claude Code",
+  "name": "render-plugin",
+  "description": "Render plugin for Claude Code",
   "owner": {
     "name": "Render",
-    "email": "support@render.com"
+    "email": "devrel@render.com"
   },
   "plugins": [
     {
@@ -13,9 +12,12 @@
       "version": "0.1.0",
       "author": {
         "name": "Render",
-        "email": "support@render.com"
+        "email": "devrel@render.com"
       },
-      "source": "./",
+      "source": {
+        "source": "github",
+        "repo": "render-oss/render-plugin-claude-code"
+      },
       "category": "developer-tools"
     }
   ]
