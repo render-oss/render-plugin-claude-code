@@ -1,6 +1,6 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "render-claude-plugins",
+  "name": "render-claude-plugin",
   "description": "Render plugins for Claude Code",
   "owner": {
     "name": "Render",
