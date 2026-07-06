@@ -4,6 +4,7 @@ Use Render from Claude Code to deploy apps, validate `render.yaml`, debug failed
 
 ## What you get
 
+- The Render MCP server preconfigured over OAuth (`.mcp.json`) so Claude can manage services, deploys, logs, metrics, and databases directly — no API key required
 - Bundled Render skills for deployment, debugging, monitoring, migrations, and workflows (synced from [render-oss/skills](https://github.com/render-oss/skills))
 - A `render-assistant` agent that specializes in Render deploys
 - Slash commands: `/deploy-to-render` and `/check-render-status`
@@ -82,7 +83,11 @@ If `render whoami -o json` fails, fix authentication before relying on Render wo
 
 ## MCP server
 
-Render's MCP server isn't included in this plugin yet because it doesn't support OAuth. Once OAuth is available, the plugin will ship with an `.mcp.json` so Claude can use Render MCP tools directly. Until then, the plugin uses the Render CLI for service creation, log retrieval, metrics, and database inspection.
+The plugin bundles Render's [MCP server](https://render.com/docs/mcp-server) through the `.mcp.json` at the repo root, so Claude can manage your Render services, deploys, logs, metrics, and databases directly.
+
+Authentication is handled over OAuth — you don't need an API key. The first time Claude uses a Render MCP tool, it opens your browser to sign in to Render and authorize access to `https://mcp.render.com/mcp`. After you approve, Claude connects automatically on future runs.
+
+The MCP server and the Render CLI (below) are complementary: MCP covers day-to-day service, log, metric, and database operations, while the CLI still backs Blueprint validation and other CLI-only workflows.
 
 ## For maintainers
 
