@@ -9,7 +9,7 @@
     {
       "name": "render",
       "description": "Deploy, debug, and monitor applications on Render",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "author": {
         "name": "Render",
         "email": "devrel@render.com"
