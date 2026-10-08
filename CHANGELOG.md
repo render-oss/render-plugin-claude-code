@@ -5,6 +5,16 @@ All notable changes to the Render plugin are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-10-08
+
+### Changed
+
+- Synced all 21 bundled skills from `render-oss/skills` release `skills-v1.0.0`: shared, single-sourced reference content across skills, doc retrieval that does not require `curl`, and the Render Workflows skill updated for SDK 1.x.
+
+### Removed
+
+- Reference files replaced by shared references: `render-deploy/references/blueprint-spec.md`, `render-disks/references/sizing-and-snapshots.md`, `render-networking/references/troubleshooting.md`, `render-scaling/references/instance-types.md`, and `render-web-services/references/deploy-lifecycle.md`.
+
 ## [0.2.1] - 2026-08-03
 
 ### Changed
