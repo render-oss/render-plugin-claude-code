@@ -8,8 +8,8 @@ Use Render from Claude Code to deploy apps, validate `render.yaml`, debug failed
 - Bundled Render skills for deployment, debugging, monitoring, migrations, and workflows (synced from [render-oss/skills](https://github.com/render-oss/skills))
 - A `render-assistant` agent that specializes in Render deploys
 - Slash commands: `/deploy-to-render` and `/check-render-status`
-- A `PostToolUse` hook that validates `render.yaml` whenever you edit it
-- Helper scripts at `scripts/` for skills sync and Blueprint validation
+- A `PostToolUse` hook that prompts Claude to validate `render.yaml` with the Render CLI whenever you edit it
+- Helper scripts at `scripts/` for skills sync and the validation hook
 
 ## Install the plugin
 

@@ -5,6 +5,21 @@ All notable changes to the Render plugin are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2026-10-27
+
+### Changed
+
+- The `render.yaml` hook no longer runs the Render CLI. It asks Claude to run `render blueprints validate`, so validation goes through your normal command approval instead of using your Render login automatically.
+- Replaced the plugin icon with a plain SVG and pointed CLI install hints at the Render docs instead of a `curl | sh` command.
+
+### Added
+
+- `privacyPolicyUrl` in `plugin.json`.
+
+### Removed
+
+- `scripts/validate-render-yaml.sh`. Run `render blueprints validate` directly.
+
 ## [0.4.0] - 2026-10-27
 
 ### Added
@@ -43,6 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `deploy-to-render` and `check-render-status` slash commands.
 - `render.yaml` validation hook.
 
+[0.4.1]: https://github.com/render-oss/render-plugin-claude-code/releases/tag/v0.4.1
 [0.4.0]: https://github.com/render-oss/render-plugin-claude-code/releases/tag/v0.4.0
 [0.3.0]: https://github.com/render-oss/render-plugin-claude-code/releases/tag/v0.3.0
 [0.2.1]: https://github.com/render-oss/render-plugin-claude-code/releases/tag/v0.2.1
