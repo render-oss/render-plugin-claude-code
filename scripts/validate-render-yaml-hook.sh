@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-# Claude Code hook: validate render.yaml after Edit/Write/MultiEdit.
+# Claude Code hook: suggest validating render.yaml after Edit/Write/MultiEdit.
 #
 # Reads the tool-call JSON payload from stdin, extracts tool_input.file_path,
-# and runs `render blueprints validate` from that file's directory when the
-# touched file is a render.yaml (or render.yml). Exits 0 on no-op so it never
-# blocks unrelated edits.
+# and, when the touched file is a render.yaml (or render.yml), asks Claude to
+# run `render blueprints validate` on it. The hook never runs the Render CLI
+# itself: validation uses the user's Render login, so it goes through the
+# user's normal Bash approval. Exits 0 on no-op so it never blocks edits.
 
 INPUT="$(cat 2>/dev/null || true)"
 if [[ -z "$INPUT" ]]; then
@@ -44,16 +45,10 @@ case "$BASENAME" in
   *) exit 0 ;;
 esac
 
-if ! command -v render &>/dev/null; then
-  echo "[render plugin] Render CLI not found. Install it to validate render.yaml:"
-  echo "  macOS:  brew install render"
-  echo "  Linux:  curl -fsSL https://raw.githubusercontent.com/render-oss/cli/main/bin/install.sh | sh"
-  exit 0
-fi
+CONTEXT="[render plugin] $FILE_PATH changed. Validate it by running \`render blueprints validate $FILE_PATH\` and fix any errors it reports. If the Render CLI is not installed, see https://render.com/docs/cli#1-install-or-upgrade."
 
-DIR="$(dirname "$FILE_PATH")"
-if [[ ! -d "$DIR" ]]; then
-  exit 0
-fi
+# Escape for a JSON string: backslashes first, then quotes.
+CONTEXT="${CONTEXT//\\/\\\\}"
+CONTEXT="${CONTEXT//\"/\\\"}"
 
-(cd "$DIR" && render blueprints validate)
+printf '{"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"%s"}}\n' "$CONTEXT"
