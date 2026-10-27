@@ -10,6 +10,7 @@
   "homepage": "https://github.com/render-oss/render-plugin-claude-code",
   "repository": "https://github.com/render-oss/render-plugin-claude-code",
   "license": "MIT",
+  "privacyPolicyUrl": "https://render.com/privacy",
   "keywords": [
     "render",
     "deploy",
