@@ -5,6 +5,12 @@ All notable changes to the Render plugin are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-10-27
+
+### Added
+
+- Bundled the `render-sandboxes` skill and six reference files from `render-oss/skills`, covering SDK and CLI usage, creation options, environment and access, snapshots, and troubleshooting. The plugin now includes 22 skills.
+
 ## [0.3.0] - 2026-10-08
 
 ### Changed
@@ -37,6 +43,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `deploy-to-render` and `check-render-status` slash commands.
 - `render.yaml` validation hook.
 
+[0.4.0]: https://github.com/render-oss/render-plugin-claude-code/releases/tag/v0.4.0
+[0.3.0]: https://github.com/render-oss/render-plugin-claude-code/releases/tag/v0.3.0
 [0.2.1]: https://github.com/render-oss/render-plugin-claude-code/releases/tag/v0.2.1
 [0.2.0]: https://github.com/render-oss/render-plugin-claude-code/releases/tag/v0.2.0
 [0.1.0]: https://github.com/render-oss/render-plugin-claude-code/releases/tag/v0.1.0
