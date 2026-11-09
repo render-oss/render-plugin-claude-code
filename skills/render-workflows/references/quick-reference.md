@@ -103,6 +103,7 @@ Retries can repeat side effects. A retried task that writes data, charges a cust
 |---|---|---|---|
 | Start without waiting | `start_task()` | `await start_task()` | `await startTask()` |
 | Start and wait | `run_task()` | `await run_task()` | `await runTask()` |
+| Saved start key (SDK 1.2.0+) | `idempotency_key=key` | `idempotency_key=key` | Third argument `{ idempotencyKey: key, signal }` |
 | Wait on started run | Poll `get_task_run()` | `await started` | `await started.get()` |
 | Get details | `get_task_run()` | `await get_task_run()` | `await getTaskRun()` |
 | List runs | `list_task_runs()` | `await list_task_runs()` | `await listTaskRuns()` |
@@ -122,7 +123,9 @@ TypeScript input is positional:
 await render.workflows.runTask("my-workflow/add", [2, 3]);
 ```
 
-Use the term **task slug** for `{workflow-slug}/{task-name}`. Task run IDs have the `trn-...` form.
+Use the term **task slug** for `{workflow-slug}/{task-name}`. Append `:{version}` to pin a version. Task run IDs have the `trn-...` form.
+
+The key option applies to both start and start-and-wait calls. Keep it with the saved input and original version across retries. It deduplicates starts for 24 hours within one version; repeated input is ignored. Follow the [complete recovery rules](task-patterns.md#retrying-a-task-start-request) before adding automatic retry behavior.
 
 `list_task_runs()` and `listTaskRuns()` return cursor-bearing wrapper objects; access the task run through `.task_run` in Python and `.taskRun` in TypeScript.
 

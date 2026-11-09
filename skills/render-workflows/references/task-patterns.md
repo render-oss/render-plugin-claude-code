@@ -137,9 +137,70 @@ task(
 );
 ```
 
-## Retries and Idempotency
+## Retrying a Task-Start Request
 
-Tasks retry automatically by default. Before running tasks that send emails, charge payments, or modify external state, use idempotency keys or another deduplication mechanism to prevent duplicate effects.
+A caller can lose the reply after Render accepts a task. Repeating an unkeyed start can then create another run. A saved request identifier, called an **idempotency key**, lets Render recognize the repeated submission.
+
+Use Python `render>=1.2.0` or TypeScript `@renderinc/sdk>=1.2.0` for the options below. Check the installed package before generating code. The [task-start API contract](https://api-docs.render.com/reference/createtask) defines these boundaries:
+
+- Keys contain 1 to 255 characters. The same key returns the original run for 24 hours within the same Workflow version. Repeated input is ignored.
+- Save the key, exact input, task slug with its original version, and creation time **before** the first request. Use the application's durable request or event record, scoped to the caller and operation. Bind the key to that input and reject conflicting reuse. Do not use one global key, an input hash alone, or a new random key on every retry.
+- Preserve the original version using `{workflow-slug}/{task-name}:{version}`. Switching to the latest version can create a second run with the same key. Stop recovery if the original version cannot be addressed, or before the 24-hour window ends, and reconcile the saved operation instead of silently creating a new key.
+- Save the returned task run ID and use it for polling. A timeout or aborted start means acceptance is unknown; it does not prove the task failed. Keep the saved submission available across the caller's retries and restarts.
+- A deliberate new request, a new scheduled occurrence, or a new attempt after a confirmed terminal failure needs a new identity. Reusing the failed run's key returns that failed run, not a fresh attempt.
+
+These helpers show only the SDK call. Their caller must load and validate the saved record described above, including its age, input binding, and version. They do not generate or persist identities for the application.
+
+Python async client:
+
+```python
+# The client reads RENDER_API_KEY in the process submitting work.
+from render import RenderAsync
+
+client = RenderAsync()
+
+async def start_saved_submission(
+    task_slug: str, input_data: list, submission_key: str
+) -> str:
+    # These values come from the saved request, including its versioned task slug.
+    # A retry passes the same values after checking that recovery is still allowed.
+    started = await client.workflows.start_task(
+        task_slug, input_data, idempotency_key=submission_key
+    )
+    # Save this ID with the request so later checks poll instead of starting again.
+    return started.id
+```
+
+TypeScript client:
+
+```typescript
+// The client reads RENDER_API_KEY in the process submitting work.
+import { Render } from "@renderinc/sdk";
+
+const client = new Render();
+
+async function startSavedSubmission(
+  taskSlug: string, inputData: unknown[], submissionKey: string,
+  signal?: AbortSignal,
+): Promise<string> {
+  // The caller has checked the saved input, original version, and recovery age.
+  // Pass cancellation and the saved key together in the third argument.
+  const started = await client.workflows.startTask(taskSlug, inputData, {
+    idempotencyKey: submissionKey,
+    signal,
+  });
+  // Save this ID before responding to the browser or acknowledging the event.
+  return started.taskRunId;
+}
+```
+
+Python sync `start_task` uses the same keyword without `await`. `run_task` and `runTask` also accept their language's key option. Putting `idempotencyKey` inside task input does not enable submission deduplication, and passing it to `ctx.run` would change task arguments rather than configure a client start.
+
+Verify the real caller path: simulate acceptance followed by a lost reply, recover after reloading its saved record, and assert one root run with the same key, input, and version. Also check two deliberate identical-input requests remain distinct, conflicting input and expired recovery are refused, and the real SDK emits `idempotencyKey` in the API body. A mock that merely accepts an extra argument does not prove that field reaches Render.
+
+## Task Execution Retries and Side Effects
+
+Tasks retry automatically by default. A start key only deduplicates creation of the root run within the boundary above. It does not make repeated task attempts, model calls, emails, payments, or restarted parent tasks execute exactly once. Preserve application records and provider-level keys or another duplicate-effect guard where needed. `ctx.run` chaining is a separate API; do not infer caller-controlled child-run recovery from the root start option.
 
 Python:
 

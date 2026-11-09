@@ -9,12 +9,13 @@ description: >-
   releasing workflows.
 license: MIT
 compatibility: >-
-  Requires Render SDK 1.x. Local validation requires Render CLI 2.12.0+;
+  Requires Render SDK 1.x; task-start idempotency requires SDK 1.2.0+.
+  Local validation requires Render CLI 2.12.0+;
   optional scaffolding and CLI deployment require Render CLI 2.16.0+.
   Blueprints support "type: workflow" (no service-level plan).
 metadata:
   author: Render
-  version: "1.2.0"
+  version: "1.2.1"
   category: workflows
 ---
 
@@ -53,6 +54,7 @@ Use the source that matches the question:
 - [Limits and Pricing for Render Workflows](https://render.com/docs/workflows-limits) for compute plans, quotas, retention, and pricing
 - [Python examples](https://github.com/render-examples/render-workflows-examples-python) and [TypeScript examples](https://github.com/render-examples/render-workflows-examples-ts) for current scaffolding patterns
 - [Render SDK repository](https://github.com/render-oss/sdk) for the implementation and changelogs
+- [Task-start API](https://api-docs.render.com/reference/createtask) for idempotency-key scope, lifetime, and versioned task slugs
 
 Before generating task or client code, fetch the relevant SDK example to verify current API patterns:
 
@@ -241,7 +243,9 @@ If deployment fails, read [references/troubleshooting.md](references/troubleshoo
 
 ## Trigger Deployed Tasks
 
-Task slugs use `{workflow-slug}/{task-name}`.
+Task slugs use `{workflow-slug}/{task-name}`. The examples below start a fresh run on each call.
+
+For web requests, webhook delivery, or application retries, read [retrying a task-start request](references/task-patterns.md#retrying-a-task-start-request) before adding retry logic. A lost reply can hide an accepted run. With Python `render>=1.2.0` or TypeScript `@renderinc/sdk>=1.2.0`, pass a saved caller submission identity as `idempotency_key=` or `{ idempotencyKey }`. Preserve its input and original Workflow version, and stop automatic resubmission before the 24-hour window expires. A new key on every retry defeats this protection.
 
 Python, synchronous:
 
