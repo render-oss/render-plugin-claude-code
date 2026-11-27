@@ -1,5 +1,7 @@
 # Task Patterns
 
+Use these patterns for task chaining, parallel fan-out, and per-task retries.
+
 These examples use the Render SDK 1.x task model. Every task accepts `TaskContext` first, and chained runs go through `ctx.run`.
 
 For Python snippets, assume:
@@ -18,7 +20,7 @@ import { task, type TaskContext } from "@renderinc/sdk/workflows";
 
 ## Fan-Out and Fan-In
 
-Use concurrent chaining when independent work benefits from separate compute and retry boundaries.
+Use concurrent chaining when independent work benefits from separate compute and retry boundaries. For binary processing, upload the intermediate artifact within the producing task and return its storage key or URL; the next task fetches it. Never pass Python bytes or TypeScript buffers through ctx.run.
 
 Python:
 
@@ -140,6 +142,10 @@ task(
 ## Retries and Idempotency
 
 Tasks retry automatically by default. Before running tasks that send emails, charge payments, or modify external state, use idempotency keys or another deduplication mechanism to prevent duplicate effects.
+
+Two kinds of idempotency apply. The SDK's `idempotency_key` (Python) or `idempotencyKey` (TypeScript) on `start_task()` and `startTask()` stops a retried client call from starting a second run. It does not stop a task retry from repeating the task's side effects. For those, pass a stable key, such as one derived from the order ID, to the downstream API.
+
+If a multi-step task must not repeat its finished steps when it fails partway, consider a durable flow instead. See [flows.md](flows.md).
 
 Python:
 

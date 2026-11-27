@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/validate-render-yaml-hook.sh",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/scripts/validate-render-yaml-hook.sh\"",
             "timeout": 15
           }
         ]

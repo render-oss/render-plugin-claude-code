@@ -57,6 +57,13 @@ mkdir -p "$TARGET_DIR"
 
 for skill in "${SKILLS[@]}"; do
   cp -R "$SOURCE_DIR/$skill" "$TARGET_DIR/$skill"
+  # Keep upstream CLI installation guidance compatible with the plugin directory.
+  # Link to the vendor instructions instead of embedding a remote installer.
+  while IFS= read -r -d '' doc; do
+    sed 's@^- Linux/macOS: .*https://raw[.]githubusercontent[.]com/render-oss/cli/main/bin/install[.]sh.*$@- Linux/macOS: follow the [Render CLI installation instructions](https://render.com/docs/cli#1-install-or-upgrade).@' \
+      "$doc" > "$TMPDIR/skill-document.md"
+    cat "$TMPDIR/skill-document.md" > "$doc"
+  done < <(find "$TARGET_DIR/$skill" -type f -name '*.md' -print0)
   file_count="$(find "$TARGET_DIR/$skill" -type f | wc -l | tr -d ' ')"
   echo "  $skill ($file_count files)"
 done

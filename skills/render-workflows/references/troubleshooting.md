@@ -87,6 +87,8 @@ Do not restore direct calls as a workaround; direct calls would bypass distribut
 
 ## Task Registration
 
+When tasks work locally but not remotely, explain that `--local` queries the local dev server; remote listing reads a deployed workflow version. Check the released version, its registration logs, synchronous entrypoint imports, the exact `{workflow-slug}/{task-name}` identifier, and credentials on the calling service. Read the deployed task identifier from the Dashboard, CLI task list for the ready workflow version, or API response, and compare it with the caller’s string. A syntactically valid slug can still identify the wrong workflow or task.
+
 ### Local task list is empty or missing tasks
 
 | Cause | Resolution |
@@ -148,6 +150,24 @@ Verify the task option name first:
 
 Then resolve current timeout bounds and compute-plan IDs from [Limits and Pricing for Render Workflows](https://render.com/docs/workflows-limits). Do not substitute a remembered legacy plan name.
 
+## Flows
+
+### Flow run fails with a `DeterminismError`
+
+A replay made different `ctx` calls than the recorded history: a step was added, removed, reordered, renamed, or given different arguments. Common causes are reading the clock, random values, or external state in flow code outside a step, iterating an unordered collection. Move non-deterministic work into steps. Catching the error does not help, because the run still fails. See [flows.md](flows.md#rules-for-flow-code).
+
+### Flow fails even though it catches an error
+
+Catch only `StepError`. A determinism error, a `ctx` call from inside a step, or a canceled run stops the run even when flow code catches the error. Python SDK 1.7.0 keeps an exhausted step fatal even if caught. A catch-and-fallback pattern requires a newer SDK with verified catchable recorded step failures; check exports and behavior before suggesting it.
+
+### Flow rejects a call or registration
+
+- A Python flow or step function is `async`: Python flows and steps must be sync.
+- A flow has a retry policy: set `retry` on its steps instead.
+- A flow calls `ctx.invoke` or `ctx.sleep` on an SDK that still rejects it: SDK 1.10.0 contains unsupported placeholders. Check implementation and backend support using [flows.md](flows.md#durable-sleep), not just method presence. A task passing a flow to `ctx.run` is a separate unsupported operation.
+- A step's function makes a `ctx` call, or a TypeScript flow runs `ctx` calls concurrently: make `ctx` calls one at a time from the flow function.
+- A step has no name: pass the step name as the first argument to `ctx.step`.
+
 ## API Client
 
 ### `await Render()` fails in Python
@@ -165,7 +185,7 @@ Use `Render` without `await` in synchronous code.
 
 ### Unauthorized or API key missing
 
-The SDK uses `RENDER_API_KEY` unless a token is passed to the constructor. Confirm that the key belongs to a user with access to the workflow's workspace. Never log or commit the key.
+The SDK uses `RENDER_API_KEY` unless a token is passed to the constructor. Verify it is actually set on the calling web service, not only in your terminal or the workflow service. Confirm that the key belongs to a user with access to the workflow's workspace. Never log or commit the key.
 
 ### Client wait was aborted but the run continues
 
@@ -220,3 +240,23 @@ Workflows are valid Blueprint services (`type: workflow`). Common failures:
 | Blueprint rejected for duplicate name | A Blueprint-managed workflow with that `name` already exists in the workspace | Rename the service, or adopt the existing resource instead of creating a second one |
 
 Do not copy the stale Workflows FAQ bullet that says Blueprints cannot manage workflows. Confirm against the [changelog](https://render.com/changelog/added-blueprint-support-for-render-workflows) and `https://render.com/schema/render.yaml.json`.
+
+## Durable Workflow Failures
+
+
+Read [flows.md](flows.md) for the execution contract and [durability.md](durability.md) for replay diagnosis and recovery checks.
+
+| Symptom | Investigation and action |
+| --- | --- |
+| Missing `workflow` / `step`, or unsupported-method error | Check the installed SDK revision and backend feature availability; an older release or a stub cannot execute durable work |
+| Async Python definition rejected | Use synchronous Python workflow definitions and step functions; verify the installed SDK signature |
+| Registered task passed to `ctx.step` | Extract a plain helper for inline work; `ctx.invoke` is a separate capability requiring availability verification |
+| Parallel or nested context calls rejected | Sequence durable steps and keep context calls outside step bodies |
+| Replay mismatch | Inspect the identified step, inputs, name, and call order; move nondeterminism into steps and preserve stable input ordering |
+| External effect happened twice | Check for a crash after the effect but before the completion record; use business-level idempotency |
+| Interrupted step fails after recovery | Inspect persisted attempt counts and retry budget; infrastructure interruptions consume it |
+| OOM in inline work | The workflow process shares the memory limit; reduce memory use or resize before starting a new run; OOM is terminal |
+| Failure caught but run still fails | Determinism and other terminal runtime errors are not business errors to swallow; inspect the actual error type/reason |
+| Local helpers pass but recovery is unknown | Run against a supported durable backend; ordinary local task execution does not prove history persistence or replay |
+
+Never repair a replay mismatch by discarding recorded history automatically. Use a fresh development run with corrected code to validate the fix. Existing runs are intended to retain their original code version.

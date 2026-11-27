@@ -5,12 +5,23 @@ All notable changes to the Render plugin are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-11-27
+
+### Changed
+
+- Refreshed all 22 bundled skills from `render-oss/skills`, including Blueprint planning and approval through MCP or CLI, explicit workspace selection, and durable Workflows flows and recovery guidance.
+- Replaced inline Render CLI installer examples with official installation links and preserved that adjustment in the skill sync script. Updated the README installation guidance and removed an illustrative installer command from the earlier changelog entry.
+
+### Fixed
+
+- Quoted the validation hook's plugin path so it works when the installation path contains spaces.
+
 ## [0.4.1] - 2026-10-27
 
 ### Changed
 
 - The `render.yaml` hook no longer runs the Render CLI. It asks Claude to run `render blueprints validate`, so validation goes through your normal command approval instead of using your Render login automatically.
-- Replaced the plugin icon with a plain SVG and pointed CLI install hints at the Render docs instead of a `curl | sh` command.
+- Replaced the plugin icon with a plain SVG and pointed CLI install hints at the Render documentation instead of an inline shell installer.
 
 ### Added
 
@@ -58,6 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `deploy-to-render` and `check-render-status` slash commands.
 - `render.yaml` validation hook.
 
+[0.5.0]: https://github.com/render-oss/render-plugin-claude-code/releases/tag/v0.5.0
 [0.4.1]: https://github.com/render-oss/render-plugin-claude-code/releases/tag/v0.4.1
 [0.4.0]: https://github.com/render-oss/render-plugin-claude-code/releases/tag/v0.4.0
 [0.3.0]: https://github.com/render-oss/render-plugin-claude-code/releases/tag/v0.3.0

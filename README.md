@@ -61,11 +61,7 @@ You can also run the slash commands directly:
 
 The plugin uses the Render CLI for live operations and Blueprint validation. Most workflows depend on it.
 
-1. Install the Render CLI:
-
-```bash
-brew install render
-```
+1. Install the Render CLI using the [official installation instructions](https://render.com/docs/cli#1-install-or-upgrade).
 
 2. Authenticate:
 
@@ -98,6 +94,8 @@ Run the sync script to refresh `skills/` from [render-oss/skills](https://github
 ```
 
 GitHub Actions also runs `.github/workflows/sync-skills.yml` each day and opens a pull request when upstream skills change.
+
+The sync replaces inline Render CLI installer examples with links to the official installation instructions to avoid download-and-run findings in the plugin directory.
 
 ## License
 
