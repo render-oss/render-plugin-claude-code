@@ -1,4 +1,4 @@
-# Workflows SDK 1.x Quick Reference
+# Task SDK Reference
 
 Use this reference for the current SDK 1.x programming model. Verify exact signatures against the installed package and the official [Python](https://render.com/docs/workflows-sdk-python) or [TypeScript](https://render.com/docs/workflows-sdk-typescript) reference before changing an existing project.
 
@@ -19,6 +19,12 @@ Current source locations:
 - TypeScript: `@renderinc/sdk/workflows` for task definitions and `@renderinc/sdk` for the API client
 - Upstream examples: [Python](https://github.com/render-oss/sdk/tree/main/python/example) and [TypeScript](https://github.com/render-oss/sdk/tree/main/typescript/examples)
 
+## Upgrade Legacy Task Calls
+
+For pasted code without project access, identify the target SDK API and state that the installed version is unverified. Preserve a pinned legacy version unless the user requests an upgrade; update definitions and callers together when upgrading.
+
+Add the runtime context as each task's first parameter, then replace direct decorated calls such as `square(n)` with `await ctx.run(square, n)`. Keep `asyncio.gather` or `Promise.all` around independent task calls to preserve fan-out. External callers continue to use the SDK client and do not supply the context.
+
 ## Define Tasks
 
 | Concept | Python | TypeScript |
@@ -30,6 +36,11 @@ Current source locations:
 | Start task server | `app.start()` | Automatic in the workflow environment |
 | Combine files | `Workflows.from_workflows(app1, app2)` | Import task modules synchronously from the entrypoint |
 | In-process unit call | `task_def.func(fake_ctx, *args)` | `taskDef.func(fakeCtx, ...args)` |
+| Run IDs | `ctx.metadata.task_run_id`, `.root_task_run_id`, `.parent_task_run_id` | `ctx.metadata.taskRunId`, `.rootTaskRunId`, `.parentTaskRunId` |
+
+For a root run, the root run ID equals the task run ID and the parent run ID is `None` in Python or `undefined` in TypeScript. `ctx.metadata` requires SDK 1.2.0 or later.
+
+For durable flows (`@app.flow`, `flow()`, and `ctx.step`), read [flows.md](flows.md).
 
 Minimal Python definition:
 
@@ -83,7 +94,7 @@ task(
 | Timeout | `timeout_seconds=` | `timeoutSeconds` |
 | Compute plan | `plan=` | `plan` |
 
-Python workflow defaults are `default_retry`, `default_timeout`, and `default_plan` on `Workflows(...)`.
+Python task defaults on the registration container are `default_retry`, `default_timeout`, and `default_plan` on `Workflows(...)`.
 
 Do not copy plan IDs, compute specifications, timeout bounds, or prices from this reference. Resolve current values from [compute-plans.md](compute-plans.md) and [Limits and Pricing for Render Workflows](https://render.com/docs/workflows-limits).
 
@@ -121,6 +132,18 @@ TypeScript input is positional:
 ```typescript
 await render.workflows.runTask("my-workflow/add", [2, 3]);
 ```
+
+Make a start call safe to retry with an idempotency key (SDK 1.2.0 or later). A repeated call with the same key within 24 hours returns the original run. Keys are scoped to the workflow.
+
+```python
+render.workflows.start_task("my-workflow/add", [2, 3], idempotency_key="add-2-3")
+```
+
+```typescript
+await render.workflows.startTask("my-workflow/add", [2, 3], { idempotencyKey: "add-2-3" });
+```
+
+In TypeScript, the third argument of `startTask()` and `runTask()` is an `AbortSignal` or an options object with `signal` and `idempotencyKey`.
 
 Use the term **task slug** for `{workflow-slug}/{task-name}`. Task run IDs have the `trn-...` form.
 
